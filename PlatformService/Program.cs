@@ -9,11 +9,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
-builder.Services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("InMem"));
 builder.Services.AddScoped<IPlatformRepo, PlatformRepo>();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies()));
 builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
 Console.WriteLine($"--> CommandService Endpoint: {builder.Configuration["CommandService"]}");
+if (builder.Environment.IsProduction())
+{
+    Console.WriteLine("--> Using SQL Server DB");
+    builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("PlatformsConn")));
+}
+else
+{
+    Console.WriteLine("--> Using InMemory DB");
+    builder.Services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("InMem"));
+}
 
 var app = builder.Build();
 
@@ -25,5 +34,5 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 app.UseHttpsRedirection();
-PreDb.PrepPopulation(app);
+PreDb.PrepPopulation(app, app.Environment.IsProduction());
 app.Run();
