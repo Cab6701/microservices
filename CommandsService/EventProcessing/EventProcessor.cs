@@ -22,7 +22,7 @@ public class EventProcessor : IEventProcessor
         switch (eventType)
         {
             case EventType.PlatformPublished:
-                Console.WriteLine("Platform published event detected");
+                AddPlatform(message);
                 break;
             default:
                 break;
@@ -59,6 +59,7 @@ public class EventProcessor : IEventProcessor
                 {
                     repo.CreatePlatform(platform);
                     repo.SaveChanges();
+                    Console.WriteLine($"Platform added: {platform.Name}");
                 }
             }
             catch (Exception ex)
