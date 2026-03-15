@@ -1,6 +1,7 @@
 using AutoMapper;
 using CommandsService.Data;
 using CommandsService.Dtos;
+using CommandsService.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CommandsService.Controllers;
@@ -30,5 +31,20 @@ public class PlatformsController : ControllerBase
     {
         Console.WriteLine("--> Inbound POST # Command Service");
         return Ok("Inbound test of from Platforms Controller");
+    }
+
+    [HttpPost("create")]
+    public ActionResult<PlatformReadDto> CreatePlatform(PlatformReadDto platformReadDto)
+    {
+        Console.WriteLine("--> Creating Platform from CommandsService");
+        if (_repository.PlatformExists(platformReadDto.Id))
+        {
+            return BadRequest("Platform already exists");
+        }
+
+        var platform = _mapper.Map<Platform>(platformReadDto);
+        _repository.CreatePlatform(platform);
+        _repository.SaveChanges();
+        return Ok(_mapper.Map<PlatformReadDto>(platform));
     }
 }
