@@ -1,5 +1,6 @@
 using AsyncDataServices;
 using CommandsService.Data;
+using CommandsService.SyncDataServices.Grpc;
 using EventProcessing;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,7 @@ builder.Services.AddAutoMapper(cfg =>
 builder.Services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("InMen"));
 builder.Services.AddScoped<ICommandRepo, CommandRepo>();
 builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
+builder.Services.AddScoped<IPlatformDataClient, PlatformDataClient>();
 builder.Services.AddHostedService<MessageBusSubscriber>();
 
 var app = builder.Build();
@@ -34,5 +36,7 @@ else
 }
 
 app.MapControllers();
+
+PrepDb.PrepPopulation(app);
 
 app.Run();
